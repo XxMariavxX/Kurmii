@@ -4,7 +4,9 @@ function Main() {
   return (
     <div>
       <main>
-        <section className='section1'></section>
+        <section className='section1'>
+          <div className='line'></div> 
+        </section>
       </main>
     </div>
   );
