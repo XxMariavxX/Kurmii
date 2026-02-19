@@ -1,0 +1,16 @@
+{
+  "name": "Kurmi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+
+  "scripts": {
+    "start": "pnpm -r --parallel run start",
+    "build": "pnpm -F frontend --parallel run build",
+    "dev": "pnpm -r --parallel run dev"
+  },
+  "keywords": [],
+  "author": "Mariia",
+  "license": "ISC",
+  "packageManager": "pnpm@10.29.3"
+}

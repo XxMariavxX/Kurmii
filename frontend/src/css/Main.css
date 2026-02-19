@@ -1,0 +1,9 @@
+.section1 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: #c38989;
+  min-height: calc(100vh - var(--heigth-footer));
+  max-width: 70vh;
+}
