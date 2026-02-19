@@ -1,0 +1,26 @@
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  height: var(--heigth-footer);
+  background-color: #020202;
+  color: #bfade8;
+  box-shadow: 0px 5px 10px 0px rgba(0, 0, 0, 0.31);
+}
+
+.logo-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-right: 30%;
+  padding-left: 30%;
+  background-color: rgb(0, 0, 0);
+}
+
+.logo-footer{
+  max-height:calc(var(--heigth-footer) - 5px);
+  width: auto;
+}
