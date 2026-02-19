@@ -19,7 +19,7 @@ export default [
 
   "joker", "judge", "joint",
 
-  "knife", "knock",
+  "knife",
 
   "light", "learn", "level", "lunch", "leave",
 
