@@ -1,7 +1,8 @@
 {
-  "name": "Kurmi",
+  "name": "kurmi",
   "version": "1.0.0",
-  "description": "",
+  "description": "Guess the word",
+
   "main": "index.js",
 
   "scripts": {
@@ -11,6 +12,6 @@
   },
   "keywords": [],
   "author": "Mariia",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@10.29.3"
 }
