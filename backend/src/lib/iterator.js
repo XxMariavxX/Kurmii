@@ -1,9 +1,10 @@
-import { generatorWord } from './wordGenerator.js';
+import generatorWord from './wordGenerator.js';
 import fiveLetterWords from '../words/fiveLetterWords.js';
 
 const globalWordGenerator = generatorWord(fiveLetterWords);
 
 export const createDailyWordGenerator = () => {
+
   let currentWordDate = new Date();
   let currentDailyWord = globalWordGenerator.next().value;
 

@@ -1,4 +1,4 @@
-export function* generatorWord(words) {
+function* generatorWord(words) {
   const newWords = [];
 
   while (true) {
@@ -12,3 +12,5 @@ export function* generatorWord(words) {
     yield word[0];
   }
 }
+
+export default generatorWord;
