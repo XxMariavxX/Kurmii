@@ -1,4 +1,4 @@
-import { createDailyWordGenerator } from '../lib/timeOutIterator.js';
+import { createDailyWordGenerator } from '../lib/iterator.js';
 
 const globalDailyWordGenerator = createDailyWordGenerator();
 
