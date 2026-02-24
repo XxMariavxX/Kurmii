@@ -16,11 +16,12 @@
   },
   "keywords": [],
   "dependencies": {
-    "fastify": "^5.0.0",
-    "fastify-plugin": "^5.0.0",
     "@fastify/autoload": "^6.0.0",
     "@fastify/sensible": "^6.0.0",
-    "fastify-cli": "^7.4.1"
+    "fastify": "^5.0.0",
+    "fastify-plugin": "^5.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "fastify-cli": "^7.4.1"
+  }
 }
