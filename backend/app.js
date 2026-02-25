@@ -17,4 +17,4 @@ module.exports = async function (fastify, opts) {
   })
 }
 
-module.exports.options = options
+module.exports.options = options;
