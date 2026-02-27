@@ -1,7 +1,7 @@
 function QuizPage() {
   <main>
-Test
-  </main>
+    Test
+  </main>;
 }
 
 export default QuizPage;

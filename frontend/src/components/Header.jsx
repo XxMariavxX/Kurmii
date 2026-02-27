@@ -10,7 +10,6 @@ function Header() {
             <img src={ico} alt="logo" className="logo-header" />
           </a>
         </div>
-        <img src="" alt="" />
       </header>
     </div>
   );
