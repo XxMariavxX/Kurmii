@@ -1,26 +1,25 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route} from "react-router-dom";
 import "./css/App.css";
-import Header from "./components/Header";
-import Main from "./components/Main";
-import Footer from "./components/Footer";
 
 import MainPage from "./pages/MainPage";
 import QuizPage from "./pages/QuizPage";
 import Result from "./pages/Result";
 
+import MainLayout from "./layout/MainLayout";
+import QuizLayout from "./layout/QuizLayout";
+
 function App() {
   return (
-    <>
-      <Header />
-
-      <Routes>
+    <Routes>
+      <Route element={<MainLayout />}>
         <Route path="/" element={<MainPage />} />
-        <Route path="/quiz" element={<QuizPage />} />
         <Route path="/result" element={<Result />} />
-      </Routes>
+      </Route>
 
-      <Footer />
-    </>
+      <Route element={<QuizLayout />}>
+        <Route path="/quiz" element={<QuizPage />} />
+      </Route>
+    </Routes>
   );
 }
 
