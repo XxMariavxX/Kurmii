@@ -1,7 +1,8 @@
 function Result() {
+  return (
   <main>
-Test
-  </main>
+    Test
+  </main>)
 }
 
 export default Result;

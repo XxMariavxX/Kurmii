@@ -1,6 +1,6 @@
-import '../css/Main.css';
+import '../css/MainHome.css';
 
-function Main() {
+function MainHome() {
   return (
     <div>
       <main>
@@ -13,4 +13,4 @@ function Main() {
   );
 }
 
-export default Main;
+export default MainHome;
