@@ -1,24 +1,20 @@
 import { useNavigate } from 'react-router-dom';
-import ico from "../assets/favicon.ico";
-import '../css/MainHome.css';
+import '../css/MainQuiz.css';
 
-function MainHome() {
-  const navigate = useNavigate();
+function MainQuiz() {
+  const navigate= useNavigate();
 
   return (
     <div>
       <main>
         <section className='section1'>
-          <div>
-            <img src={ico} alt='icoKurmi'/>
-          </div>
           <div className='line'>
             </div>
           <button 
             onClick={() => navigate('/quiz')} 
             className='navigate-button'
           >
-            Daily word
+            Start Quiz
           </button>
         </section>
       </main>
@@ -26,4 +22,4 @@ function MainHome() {
   );
 }
 
-export default MainHome;
+export default MainQuiz;
