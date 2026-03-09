@@ -7,8 +7,8 @@ function MainQuiz() {
   return (
     <div>
       <main>
-        <section className='section1'>
-          <div className='line'>
+        <section className='section2'>
+          <div className='quiz'>
             </div>
           <button 
             onClick={() => navigate('/quiz')} 
