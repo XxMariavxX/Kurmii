@@ -9,6 +9,7 @@
   "directories": {
     "test": "test"
   },
+  
   "scripts": {
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js -p 3001",
