@@ -1,9 +1,9 @@
 'use strict'
 
-const { getWord } = require('../controllers/wordController');
+import getWord from "../controllers/wordController";
 
-module.exports = async function (fastify, opts) {
+export default async function (fastify, opts) {
   fastify.get('/daily-word', async function (request, reply) {
-    return getWord()
+    return getWord;
   })
 }

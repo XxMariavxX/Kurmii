@@ -8,8 +8,8 @@
   font-weight: bold;
   font-style: normal;
   box-sizing: border-box;
-  --heigth-footer: 80px;
-  --heigth-header: 80px;
+  --heigth-footer: 60px;
+  --heigth-header: 60px;
   margin: 0;
   padding: 0;
 }

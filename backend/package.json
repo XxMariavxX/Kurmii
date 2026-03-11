@@ -6,6 +6,7 @@
   "private": true,
   "license": "MIT",
   "main": "app.js",
+  "type": "module",
   "directories": {
     "test": "test"
   },

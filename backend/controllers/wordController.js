@@ -1,4 +1,4 @@
-const { dailyWord } = require("../services/dailyWordGenerator.js");
+import { dailyWord } from "../services/dailyWordGenerator.js";
 
 const globalDailyWord = dailyWord();
 
@@ -11,4 +11,4 @@ const getWord = async () => {
   };
 };
 
-module.exports = { getWord };
+export default getWord;
