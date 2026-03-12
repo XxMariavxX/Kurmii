@@ -1,5 +1,3 @@
-'use strict'
-
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import AutoLoad from "@fastify/autoload";
@@ -24,4 +22,4 @@ export default async function (fastify, opts) {
   })
 }
 
-module.exports.options = options; //should understand 
+export { options };

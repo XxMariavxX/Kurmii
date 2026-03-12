@@ -8,10 +8,9 @@ function MainHome() {
 
   return (
     <>
-
       <main>
         <section className="section1">
-         <Header />
+          <Header />
           <div className="block1">
             <img className="ico" src={ico} alt="icoKurmi" />
           </div>

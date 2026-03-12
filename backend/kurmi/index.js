@@ -1,5 +1,2 @@
-import { dailyWordService } from './kurmi.service.js';
-
-setInterval(() => {
-  console.log('Current word:', dailyWordService());
-}, 2000);
+// Debug/experimental module — not loaded by Fastify autoload
+// import { dailyWordService } from './kurmi.service.js';

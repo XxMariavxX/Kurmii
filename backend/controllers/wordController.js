@@ -7,7 +7,6 @@ const getWord = async () => {
 
   return {
     word: word,
-    length: word.length,
   };
 };
 

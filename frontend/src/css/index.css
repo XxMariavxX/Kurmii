@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap");
-
 * {
   box-sizing: border-box;
   font-family: "Comfortaa", sans-serif;
@@ -7,7 +5,6 @@
   font-weight: 800;
   font-weight: bold;
   font-style: normal;
-  box-sizing: border-box;
   --heigth-footer: 60px;
   --heigth-header: 60px;
   margin: 0;
