@@ -21,12 +21,20 @@ export function memoize(fn, options = {}) {
       if (now - entry.createdAt <= ttl) {
         entry.lastAccessed = now;
         entry.accessCount += 1;
+
+        if (policy.toLowerCase() === "lru") {
+          cache.delete(key);
+          cache.set(key, entry);
+        }
+
+        console.log(`[CACHE] : ${key}`);
         return entry.value;
       }
-
+      
       cache.delete(key);
     }
 
+    console.log(`[COMPUTE] : ${key}`);
     const result = fn(...args);
 
     if (cache.size >= capacity && cache.size > 0) {
@@ -35,26 +43,26 @@ export function memoize(fn, options = {}) {
       if (policy.toLowerCase() === "custom" && typeof custom === "function") {
         keyToRemove = custom(cache);
       } else if (policy.toLowerCase() === "lru") {
-        let oldestTime = Infinity;
-
-        for (const [cacheKey, value] of cache.entries()) {
-          if (value.lastAccessed < oldestTime) {
-            oldestTime = value.lastAccessed;
-            keyToRemove = cacheKey;
-          }
-        }
+        keyToRemove = cache.keys().next().value;
       } else {
         let minCount = Infinity;
+        let oldestAccess = Infinity;
 
         for (const [cacheKey, value] of cache.entries()) {
-          if (value.accessCount < minCount) {
+          const isLowerFrequency = value.accessCount < minCount;
+          const isSameFrequencyOlder =
+            value.accessCount === minCount && value.lastAccessed < oldestAccess;
+
+          if (isLowerFrequency || isSameFrequencyOlder) {
             minCount = value.accessCount;
+            oldestAccess = value.lastAccessed;
             keyToRemove = cacheKey;
           }
         }
       }
 
       if (keyToRemove !== null) {
+        console.log(`[EVICT] ${policy}: ${keyToRemove}`);
         cache.delete(keyToRemove);
       }
     }
@@ -65,7 +73,9 @@ export function memoize(fn, options = {}) {
       lastAccessed: now,
       accessCount: 1,
     });
-
+    
     return result;
   };
 }
+
+export default memoize;

@@ -1,8 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import '../css/MainQuiz.css';
 
 function MainQuiz() {
-  const navigate= useNavigate();
 
   return (
     <div>
@@ -11,7 +9,7 @@ function MainQuiz() {
           <div className='quiz'>
             </div>
           <button 
-            onClick={() => navigate('/quiz')} 
+            onClick={() => {'/'}}
             className='navigate-button'
           >
             Start Quiz
