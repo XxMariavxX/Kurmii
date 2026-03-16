@@ -1,5 +1,6 @@
 .footer {
-  position: relative;
+  position: fixed;
+  bottom:0;
   width: 100%;
 
   display: flex;
@@ -30,4 +31,5 @@
 .logo-footer {
   max-height: calc(var(--heigth-footer) - 5px);
   width: auto;
+  cursor: pointer;
 }

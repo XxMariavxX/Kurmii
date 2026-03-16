@@ -5,7 +5,7 @@ export function memoize(fn, options = {}) {
   const {
     capacity = Infinity,
     policy = "LRU",
-    ttl = 5000,
+    ttl = 10000,
     custom = null,
   } = normalizedOptions;
 
@@ -27,20 +27,20 @@ export function memoize(fn, options = {}) {
           cache.set(key, entry);
         }
 
-        console.log(`[CACHE] : ${key}`);
+        console.log(`[Cache] : ${entry.value}`);
         return entry.value;
       }
       
       cache.delete(key);
     }
 
-    console.log(`[COMPUTE] : ${key}`);
+    console.log(`[Compute] : ${key}`);
     const result = fn(...args);
 
     if (cache.size >= capacity && cache.size > 0) {
       let keyToRemove = null;
 
-      if (policy.toLowerCase() === "custom" && typeof custom === "function") {
+      if (policy.toLowerCase() === "custom") {
         keyToRemove = custom(cache);
       } else if (policy.toLowerCase() === "lru") {
         keyToRemove = cache.keys().next().value;
@@ -62,7 +62,7 @@ export function memoize(fn, options = {}) {
       }
 
       if (keyToRemove !== null) {
-        console.log(`[EVICT] ${policy}: ${keyToRemove}`);
+        console.log(`[Remove] ${policy}: ${keyToRemove}`);
         cache.delete(keyToRemove);
       }
     }
