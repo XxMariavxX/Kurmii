@@ -22,9 +22,10 @@ body {
   box-sizing: border-box;
   font-optical-sizing: auto;
   font-weight: 800;
+  font-size: 20px;
   font-weight: bold;
   font-style: normal;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 .button {

@@ -1,9 +1,0 @@
-.line {
-  display: flex;
-}
-
-.tile {
-  width: 40px;
-  height: 40px;
-  border: 1px solid black;
-}

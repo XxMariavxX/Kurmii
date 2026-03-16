@@ -1,0 +1,17 @@
+.line {
+  display: grid;
+  grid-template-columns: repeat(5, 55px);
+  gap: 3px;
+}
+
+.tile {
+  width: 55px;
+  height: 55px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}

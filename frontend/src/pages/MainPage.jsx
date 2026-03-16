@@ -1,6 +1,5 @@
 import Footer from '../components/Footer'
 import MainHome from '../components/MainHome'
-import '../css/App.css'
 
 function MainPage() {
   return(
