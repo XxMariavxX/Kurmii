@@ -1,35 +1,30 @@
 .footer {
-  position: fixed;
-  bottom:0;
+  margin-top: auto;
+  flex-shrink: 0;
   width: 100%;
-
+  height: var(--heigth-footer);
   display: flex;
   justify-content: center;
   align-items: center;
-
-  height: var(--heigth-footer);
   background-color: #020202;
   color: #bfade8;
   box-shadow: 0px -5px 10px 0px rgba(0, 0, 0, 0.31);
-  overflow: hidden;
+  z-index: 100;
 }
 
 .logo-text {
   display: flex;
-  justify-content: space-between;
   flex-direction: row;
+  justify-content: center;
   align-items: center;
-
-  gap: 20%; 
-  width: auto; 
-  background-color: transparent;
-
-  background-color: rgb(0, 0, 0);
-  box-sizing: border-box;
+  gap: 30px;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0 20px;
 }
 
 .logo-footer {
-  max-height: calc(var(--heigth-footer) - 5px);
+  max-height: calc(var(--heigth-footer) - 10px);
   width: auto;
   cursor: pointer;
 }
