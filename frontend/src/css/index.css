@@ -1,12 +1,12 @@
-* {
-  box-sizing: border-box;
-  font-family: "Comfortaa", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 800;
-  font-weight: bold;
-  font-style: normal;
+#root {
   --heigth-footer: 60px;
   --heigth-header: 60px;
+
+  min-height: 100dvh;
+}
+
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
@@ -14,14 +14,17 @@
 html,
 body {
   background-color: #f4e8d4;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
+  min-height: 100dvh;
+  width: 100%;
+  overflow-x: hidden;
 
-body {
-  display: flex;
-  flex-direction: column;
+  font-family: "Comfortaa", sans-serif;
+  box-sizing: border-box;
+  font-optical-sizing: auto;
+  font-weight: 800;
+  font-weight: bold;
+  font-style: normal;
+  /* overflow: hidden; */
 }
 
 .button {

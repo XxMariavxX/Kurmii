@@ -2,7 +2,7 @@ import '../css/Tiles.css';
 
 const WORD_LENGTH = 5;
 
-function Line({ guess }) {
+function BoxQuiz({ guess }) {
   const tiles = [];
 
   for (let i = 0; i < WORD_LENGTH; i++) {
@@ -15,4 +15,4 @@ function Line({ guess }) {
   );
 }
 
-export default Line;
+export default BoxQuiz;

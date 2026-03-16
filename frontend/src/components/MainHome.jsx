@@ -15,7 +15,7 @@ function MainHome() {
             <img className="ico" src={ico} alt="icoKurmi" />
           </div>
 
-          <div className="line">
+          <div className="home-actions">
             <button
               onClick={() => navigate("/quiz")}
               className="quiz-daily-word"

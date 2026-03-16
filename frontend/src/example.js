@@ -13,8 +13,8 @@ lru(2);
 lru(3);
 
 lru(2);
+lru(4);
 lru(3);
-lru(1);
 
 const lfu = memoize(example, { capacity: 3, policy: "LFU" });
 
@@ -32,14 +32,16 @@ lfu(2);
 lfu(3);
 lfu(4);
 
-const ttl = memoize(example, { ttl: 500 });
+const ttl = memoize(example, { ttl: 100 });
 
 console.log("TTL");
 
 ttl(100);
-ttl(100);
-setTimeout(() => ttl(100), 200);
+ttl(200);
+ttl(200);
+setTimeout(() => ttl(200), 200);
 setTimeout(() => ttl(100), 700);
+ttl(100);
 
 const short = memoize(example, 2);
 console.log("Custom");
