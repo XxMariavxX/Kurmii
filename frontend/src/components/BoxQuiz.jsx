@@ -1,4 +1,4 @@
-import '../css/Tiles.css';
+import '../css/BoxQuiz.css';
 
 const WORD_LENGTH = 5;
 
