@@ -2,7 +2,7 @@
   margin-top: auto;
   flex-shrink: 0;
   width: 100%;
-  height: var(--heigth-footer);
+  height: var(--height-footer);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -24,7 +24,7 @@
 }
 
 .logo-footer {
-  max-height: calc(var(--heigth-footer) - 10px);
+  max-height: calc(var(--height-footer) - 10px);
   width: auto;
   cursor: pointer;
 }

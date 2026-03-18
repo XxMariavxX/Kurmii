@@ -1,6 +1,6 @@
 #root {
-  --heigth-footer: 60px;
-  --heigth-header: 60px;
+  --height-footer: 60px;
+  --height-header: 70px;
 
   min-height: 100dvh;
 }

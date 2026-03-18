@@ -4,7 +4,7 @@ export function memoize(fn, options = {}) {
 
   const {
     capacity = Infinity,
-    policy = "LRU",
+    policy = "LFU",
     ttl = 10000,
     custom = null,
   } = normalizedOptions;
