@@ -15,3 +15,10 @@
   font-weight: 700;
   text-transform: uppercase;
 }
+
+@media (max-width = 380) {
+  .line {
+    grid-template-columns: repeat(5, 40px);
+    gap: 2px;
+  }
+}
