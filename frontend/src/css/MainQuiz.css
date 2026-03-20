@@ -1,5 +1,6 @@
 .title {
   font-size: 2rem;
+  margin-top: 10px;
 }
 
 .section2 {
@@ -24,20 +25,28 @@
 .keyboard {
   display: grid;
   gap: 8px;
-  width: min(100%, 520px);
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  padding: 10px;
+  user-select: none;
 }
 
 .keyboard-row {
   display: flex;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
+  touch-action: manipulation;
 }
 
 .key-btn {
+  transition: all 0.1s ease;
+  box-shadow: 0 3px 0px #e7c2cf;
+
+  text-transform: uppercase;
   min-width: 40px;
-  height: 46px;
+  height: 45px;
   padding: 0 8px;
-  border: none;
   border-radius: 8px;
   background-color: #d3c8eb;
   color: #2a2a2a;
@@ -46,5 +55,18 @@
 }
 
 .key-btn-wide {
-  min-width: 68px;
+  flex: 1.5;
+  min-width: 65px;
+}
+
+@media (max-width: 380px) {
+  .key-btn {
+    height: 45px;
+    border-radius: 4px;
+    max-width: 250px;
+  }
+  
+  .keyboard-row {
+    gap: 2px;
+  }
 }
