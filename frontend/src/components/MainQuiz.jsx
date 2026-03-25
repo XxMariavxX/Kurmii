@@ -2,18 +2,38 @@ import { useEffect, useState } from "react";
 import "../css/MainQuiz.css";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
+import { fetchDailyWord } from "../api";
 
 const MAX_ROWS = 6;
 const WORD_LENGTH = 5;
 
 function MainQuiz() {
+  const [targetWord, setTargetWord] = useState("");
   const [guesses, setGuesses] = useState(Array(MAX_ROWS).fill(""));
   const [currentRow, setCurrentRow] = useState(0);
 
+  useEffect(() => {
+    const loadDailyWord = async () => {
+      try {
+        const data = await fetchDailyWord();
+        setTargetWord((data.word || "").toUpperCase());
+      } catch (error) {
+        console.error("error", error);
+        alert("Try again");
+      }
+    };
+
+    loadDailyWord();
+  }, []);
+
   const addLetter = (letter) => {
+    if (!targetWord) {
+      return;
+    }
+
     setGuesses((prev) => {
       const row = prev[currentRow];
-      if (!row || row.length >= WORD_LENGTH) {
+      if (row === undefined || row.length >= WORD_LENGTH) {
         return prev;
       }
 
@@ -24,6 +44,10 @@ function MainQuiz() {
   };
 
   const removeLetter = () => {
+    if (!targetWord) {
+      return;
+    }
+
     setGuesses((prev) => {
       const row = prev[currentRow] ?? "";
       if (row.length === 0) {
@@ -37,6 +61,10 @@ function MainQuiz() {
   };
 
   const submitRow = () => {
+    if (!targetWord) {
+      return;
+    }
+
     if (guesses[currentRow]?.length !== WORD_LENGTH) {
       return;
     }
