@@ -10,7 +10,6 @@
   "directories": {
     "test": "test"
   },
-  
   "scripts": {
     "test": "node --test test/**/*.test.js",
     "start": "fastify start -l info app.js -p 3001",
@@ -19,6 +18,7 @@
   "keywords": [],
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
+    "@fastify/cors": "^11.2.0",
     "@fastify/sensible": "^6.0.0",
     "fastify": "^5.0.0",
     "fastify-plugin": "^5.0.0"
