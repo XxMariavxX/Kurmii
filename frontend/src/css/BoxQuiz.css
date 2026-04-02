@@ -14,9 +14,25 @@
   font-size: 1.5rem;
   font-weight: 700;
   text-transform: uppercase;
+  transition: background-color 0.3s ease;
 }
 
-@media (max-width = 380) {
+.tile.correct {
+  background-color: #6aaa64;
+  color: white;
+}
+
+.tile.present {
+  background-color: #c9b458;
+  color: white;
+}
+
+.tile.absent {
+  background-color: #787c7e;
+  color: white;
+}
+
+@media (max-width: 380px) {
   .line {
     grid-template-columns: repeat(5, 40px);
     gap: 2px;
