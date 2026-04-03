@@ -1,7 +1,8 @@
 class PriorityQueue {
-  constructor() {
+  constructor(maxSize = 20) {
     this.queue = [];
     this.counter = 0;
+    this.maxSize = maxSize;
   }
 
   enqueue(item, priority) {
@@ -10,6 +11,10 @@ class PriorityQueue {
       priority: priority,
       order: this.counter++,
     });
+
+    if (this.queue.length > this.maxSize) {
+      this.removeItem(0);
+    }
   }
 
   removeItem(index) {
@@ -30,31 +35,32 @@ class PriorityQueue {
       return this.removeItem(0);
     }
 
-    if (mode === "new") {
+    if (mode === "newest") {
       return this.removeItem(this.queue.length - 1);
     }
 
     if (mode === "highest") {
-      let highestIndex = 0;
+      let highest = 0;
 
       for (let i = 1; i < this.queue.length; i++) {
-        if (this.queue[i].priority < this.queue[highestIndex].priority) {
-          highestIndex = i;
+        if (this.queue[i].priority < this.queue[highest].priority) {
+          highest = i;
         }
       }
 
-      return this.removeItem(highestIndex);
+      return this.removeItem(highest);
     }
+    
     if (mode === "lowest") {
-      let lowIndex = 0;
+      let lowest = 0;
 
       for (let i = 1; i < this.queue.length; i++) {
-        if (this.queue[i].priority > this.queue[lowIndex].priority) {
-          lowIndex = i;
+        if (this.queue[i].priority > this.queue[lowest].priority) {
+          lowest = i;
         }
       }
 
-      return this.removeItem(lowIndex);
+      return this.removeItem(lowest);
     }
   }
 
@@ -98,3 +104,5 @@ class PriorityQueue {
       : this.queue[this.queue.length - 1].item;
   }
 }
+
+// it will be used for users to save their attempts and the best one in the week will be on the interface
