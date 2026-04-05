@@ -61,4 +61,4 @@ const _checkGuess = (guess) => {
   return { result };
 };
 
-export const checkGuess = memoize(_checkGuess, { capacity: 100 });
+export const checkGuess = memoize(_checkGuess, { capacity: 10 });

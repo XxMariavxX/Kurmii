@@ -1,28 +1,40 @@
 import generatorWord from '../lib/wordGenerator.js';
 import fiveLetterWords from '../words/fiveLetterWords.js';
+import memoize from '../lib/memoize.js';
 
-const globalWordGenerator = generatorWord(fiveLetterWords);
+
+const calculateWordIndexByDate = (dateString) => {
+
+  const [year, month, day] = dateString.split('-').map(Number);
+  const dateNumber = year * 10000 + month * 100 + day;
+  
+  let seed = dateNumber;
+  let random = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+  
+  let generator = generatorWord(fiveLetterWords);
+
+  const index = Math.floor(random() * fiveLetterWords.length);
+  
+  for (let i = 0; i <= index; i++) {
+    generator.next();
+  }
+  
+  return generator.next().value;
+};
+
+const getMemoizedDailyWord = memoize(calculateWordIndexByDate, { capacity: 365 });
 
 export const dailyWord = () => {
-
-  let currentWordDate = new Date();
-  let currentDailyWord = globalWordGenerator.next().value;
-
   return {
     next() {
-      const today = new Date();
-
-      if (
-        today.getFullYear() !== currentWordDate.getFullYear() ||
-        today.getMonth() !== currentWordDate.getMonth() ||
-        today.getDate() !== currentWordDate.getDate()
-      ) {
-        currentWordDate = today;
-        currentDailyWord = globalWordGenerator.next().value;
-      }
-
+      const today = new Date().toISOString().split('T')[0];
+      const word = getMemoizedDailyWord(today);
+      
       return {
-        value: currentDailyWord,
+        value: word,
         done: false,
       };
     },
