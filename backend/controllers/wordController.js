@@ -4,7 +4,7 @@ import memoize from "../lib/memoize.js";
 
 const validWords = new Set(fiveLetterWords.map(word => word.toUpperCase()));
 
-const getDailyWord = () => {
+export const getDailyWord = () => {
   const dw = dailyWord();
   return dw.next().value.toUpperCase();
 };
@@ -17,9 +17,11 @@ export const getDailyWordMeta = () => {
   };
 };
 
-const _checkGuess = (guess) => {
+// 1. ВІДКРИВАЄМО функцію _checkGuess. Вона приймає guess і ТЕПЕРІШНЄ СЛОВО (targetWord)
+const _checkGuess = (guess, targetWord) => { 
   const normalizedGuess = guess.toUpperCase();
 
+  // 2. ВСЯ логіка перевірок лежить ВСЕРЕДИНІ цих фігурних дужок
   if (normalizedGuess.length !== 5) {
     throw new Error('Word must be exactly 5 letters long');
   }
@@ -28,9 +30,9 @@ const _checkGuess = (guess) => {
     throw new Error('Word not found in dictionary');
   }
 
-  const targetWord = getDailyWord();
   const result = [];
-  const targetLetters = targetWord.split('');
+  
+  const targetLetters = targetWord.split(''); 
   const guessLetters = normalizedGuess.split('');
 
   const used = new Array(5).fill(false);
@@ -59,6 +61,12 @@ const _checkGuess = (guess) => {
   }
 
   return { result };
+
 };
 
-export const checkGuess = memoize(_checkGuess, { capacity: 10 });
+const memoizedCheckGuess = memoize(_checkGuess, { capacity: 10 });
+
+export const checkGuess = (guess) => {
+  const currentDailyWord = getDailyWord(); 
+  return memoizedCheckGuess(guess, currentDailyWord);
+};
