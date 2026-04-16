@@ -1,8 +1,8 @@
-import { getDailyWordMeta, checkGuess } from "../controllers/wordController.js";
-import { newFilter, checkWordMatchSlowly } from "../lib/asyncHelpers.js";
-import fiveLetterWords from ".../words/fiveLetterWords.js";
+import { getDailyWordMeta, checkGuess, getDailyWord } from "../controllers/wordController.js";
+import { newFilter, checkWordMatchSlowly } from "../lib/helpers.js";
 
 export default async function (fastify, opts) {
+
   fastify.get("/daily-word", async function (request, reply) {
     return getDailyWordMeta();
   });
@@ -23,11 +23,12 @@ export default async function (fastify, opts) {
   });
 
   fastify.get("/hints", async function (request, reply) {
-    const { letter } = request.query;
+    const { guessed } = request.query;
 
-    if (!letter || typeof letter !== "string") {
-      return reply.code(400).send({ error: "Choose the letter for tip" });
-    }
+    const guessedArray = guessed ? guessed.toUpperCase().split(',') : [];
+
+    const dailyWord = getDailyWord();
+    const lettersArray = dailyWord.split('');
 
     const controller = new AbortController();
     const signal = controller.signal;
@@ -37,12 +38,24 @@ export default async function (fastify, opts) {
     }, 3000);
 
     try {
-      const matchingWords = await newFilter(
-        fiveLetterWords,
-        (word, sig) => checkWordMatchSlowly(word, letter, sig), signal
+      const availableHint = await newFilter(
+        lettersArray,
+        (letter, sig) => checkWordMatchSlowly(letter, guessedArray, sig), signal
       );
 
       clearTimeout(timeOutId);
+
+      if (availableHint.length === 0) {
+        return reply.send({ hint: null, message: 'You guess all letters' });
+      }
+      const randomHint = availableHint[Math.floor(Math.random() * availableHint.length)];
+      return reply.send({ hint: randomHint });
+    } catch (error) {
+
+      if (error.name === 'AbortError') {
+        return reply.code(408).send({ error: "The time is run out" });
+      }
+      return reply.code(500).send({ error: "error " + error.message });
     }
   });
 }
