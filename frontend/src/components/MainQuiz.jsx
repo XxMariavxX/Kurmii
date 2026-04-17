@@ -17,6 +17,7 @@ function MainQuiz() {
   const [currentRow, setCurrentRow] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     const loadGameMeta = async () => {
@@ -32,6 +33,13 @@ function MainQuiz() {
 
     loadGameMeta();
   }, []);
+
+  const countHint = async () => {
+    if (count >= 2) {
+      return alert("You have already spent all hints 🥕");
+    }
+    setCount((prev) => prev + 1);
+  }
 
   const addLetter = (letter) => {
     if (loading || error || currentRow >= MAX_ROWS) return;
@@ -113,7 +121,7 @@ function MainQuiz() {
         <section className="section2">
           <header className="block">
             <p className="game-id">Game ID: {gameMeta?.gameId}</p>
-            <button type="button" className="help-carrot quiz-help-carrot" aria-label="Help">
+            <button type="button" className="help-carrot quiz-help-carrot" aria-label="Help" onClick = {countHint} disabled={count >= 2}>
               <img src={carrot} title="help" alt="help-carrot" />
             </button>
           </header>
