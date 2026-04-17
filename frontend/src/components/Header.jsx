@@ -1,5 +1,5 @@
 import "../css/Header.css";
-import carrot from "../assets/carrot-before-hovers.png"
+import carrot from "../assets/carrot-before-hovers.png";
 
 function Header() {
   return (
