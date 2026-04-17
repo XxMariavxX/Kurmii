@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import "../css/MainQuiz.css";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
 import { fetchDailyWordMeta, checkWord } from "../api";
+import carrot from "../assets/carrot-before-hovers.png";
+import "../css/MainQuiz.css";
+import "../css/Header.css";
+
 
 const MAX_ROWS = 6;
 const WORD_LENGTH = 5;
@@ -108,7 +111,12 @@ function MainQuiz() {
     <div>
       <main>
         <section className="section2">
-          <p>Game ID: {gameMeta?.gameId}</p>
+          <header className="block">
+            <p className="game-id">Game ID: {gameMeta?.gameId}</p>
+            <button type="button" className="help-carrot quiz-help-carrot" aria-label="Help">
+              <img src={carrot} title="help" alt="help-carrot" />
+            </button>
+          </header>
 
           <div className="quiz">
             {Array.from({ length: MAX_ROWS }).map((_, index) => (

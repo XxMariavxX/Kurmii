@@ -17,6 +17,25 @@
   margin: 0 auto;
 }
 
+.block {
+  width: 80%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.game-id {
+  margin: 0;
+  color: #5e548e;
+  font-weight: 600;
+}
+
+.quiz-help-carrot {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
 .quiz {
   display: grid;
   gap: 5px;
