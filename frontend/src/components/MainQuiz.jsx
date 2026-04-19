@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
-import { fetchDailyWordMeta, checkWord } from "../api";
+import { fetchDailyWordMeta, checkWord, fetchDaylyHints } from "../api";
 import carrot from "../assets/carrot-before-hovers.png";
 import "../css/MainQuiz.css";
 import "../css/Header.css";
@@ -18,6 +18,9 @@ function MainQuiz() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [count, setCount] = useState(0);
+  const [hintText, setHintText] = useState("");
+  const [hintedLetters, setHintedLetters] = useState([]);
+  const [isHintModalOpen, setIsHintModalOpen] = useState(false);
 
   useEffect(() => {
     const loadGameMeta = async () => {
@@ -38,8 +41,33 @@ function MainQuiz() {
     if (count >= 2) {
       return alert("You have already spent all hints 🥕");
     }
-    setCount((prev) => prev + 1);
-  }
+
+    try {
+      const guessedFromRows = guesses
+        .join("")
+        .toUpperCase()
+        .split("")
+        .filter((char) => /^[A-Z]$/.test(char));
+
+      const uniqueGuessed = [...new Set([...guessedFromRows, ...hintedLetters])];
+      const guessedParam = uniqueGuessed.join(",");
+
+      const data = await fetchDaylyHints(guessedParam);
+
+      setCount((prev) => prev + 1);
+
+      if (data?.hint) {
+        setHintedLetters((prev) => [...new Set([...prev, data.hint])]);
+        setHintText(`Hint: ${data.hint}`);
+      } else {
+        setHintText(data?.message || "No more hints available");
+      }
+
+      setIsHintModalOpen(true);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
 
   const addLetter = (letter) => {
     if (loading || error || currentRow >= MAX_ROWS) return;
@@ -125,6 +153,23 @@ function MainQuiz() {
               <img src={carrot} title="help" alt="help-carrot" />
             </button>
           </header>
+
+          {isHintModalOpen ? (
+            <div className="hint-modal-overlay" onClick={() => setIsHintModalOpen(false)}>
+              <div className="hint-modal" onClick={(event) => event.stopPropagation()}>
+                <button
+                  type="button"
+                  className="hint-modal-close"
+                  aria-label="Close hint"
+                  onClick={() => setIsHintModalOpen(false)}
+                >
+                  ×
+                </button>
+                <h3 className="hint-modal-title">Carrot hint</h3>
+                <p className="hint-modal-text">{hintText}</p>
+              </div>
+            </div>
+          ) : null}
 
           <div className="quiz">
             {Array.from({ length: MAX_ROWS }).map((_, index) => (

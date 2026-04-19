@@ -36,6 +36,57 @@
   padding: 0;
 }
 
+.hint-text {
+  margin: 0;
+  color: #5e548e;
+  font-weight: 600;
+}
+
+.hint-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.hint-modal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  background: #fff8ee;
+  border-radius: 12px;
+  padding: 16px 16px 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.hint-modal-title {
+  margin: 0 0 8px;
+  color: #5e548e;
+}
+
+.hint-modal-text {
+  margin: 0 0 14px;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.hint-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #5e548e;
+  cursor: pointer;
+}
+
 .quiz {
   display: grid;
   gap: 5px;
