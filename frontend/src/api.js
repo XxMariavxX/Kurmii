@@ -16,9 +16,21 @@ export async function checkWord(guess) {
     },
     body: JSON.stringify({ guess }),
   });
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
   }
+  return response.json();
+}
+
+export async function fetchDaylyHints(guessLetter) {
+  const response = await fetch(`${API_BASE}/hints?guessed=${encodeURIComponent(guessLetter ?? "")}`);
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+  }
+
   return response.json();
 }

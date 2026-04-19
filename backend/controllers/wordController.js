@@ -17,11 +17,9 @@ export const getDailyWordMeta = () => {
   };
 };
 
-// 1. ВІДКРИВАЄМО функцію _checkGuess. Вона приймає guess і ТЕПЕРІШНЄ СЛОВО (targetWord)
 const _checkGuess = (guess, targetWord) => { 
   const normalizedGuess = guess.toUpperCase();
 
-  // 2. ВСЯ логіка перевірок лежить ВСЕРЕДИНІ цих фігурних дужок
   if (normalizedGuess.length !== 5) {
     throw new Error('Word must be exactly 5 letters long');
   }
