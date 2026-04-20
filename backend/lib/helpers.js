@@ -17,7 +17,7 @@ export const checkWordMatchSlowly = async (letter, guessedArray, signal) => {
     const timer = setTimeout(() => {
       const isHidden = !guessedArray.includes(letter);
       resolve(isHidden);
-    }, 500);
+    }, 50);
 
     if (signal) {
       signal.addEventListener('abort', () => {
