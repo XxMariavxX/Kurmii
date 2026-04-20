@@ -13,5 +13,8 @@
   "keywords": [],
   "author": "Mariia",
   "license": "MIT",
-  "packageManager": "pnpm@10.29.3"
+  "packageManager": "pnpm@10.29.3",
+  "engines": {
+    "node": ">= 22.x"
+  }
 }
