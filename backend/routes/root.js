@@ -52,17 +52,56 @@ export default async function (fastify, opts) {
   });
 
   fastify.post("/check-word", async function (request, reply) {
-    const { guess } = request.body;
+    const rawGuess = request.body?.guess;
 
-    if (!guess || typeof guess !== "string") {
+    if (!rawGuess || typeof rawGuess !== "string") {
       return reply.code(400).send({ error: "Invalid guess: must be a string" });
     }
 
+    const guess = rawGuess.toUpperCase();
+
+    if (guess.length !== 5) {
+      return reply.code(400).send({ error: "Invalid guess: must be 5 letter" });
+    }
+
+    const targetWord = getDailyWord();
+
+    reply.raw.setHeader('Content-Type', 'text/event-stream');
+    reply.raw.setHeader('Cache-Control', 'no-cache');
+    reply.raw.setHeader('Connection', 'keep-alive');
+
+    async function* validateLetterByLetter() {
+      let correctLetterCount = 0;
+
+      for (let i = 0; i < 5; i++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        let status = "absent";
+        if (guess[i] === targetWord[i]) {
+          status = "correct";
+          correctLetterCount++;
+        } else if (targetWord.includes(guess[i])) {
+          status = "present";
+        }
+
+        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status });
+      }
+
+      if (correctLetterCount === 5) {
+        yield JSON.stringify({ type: "result", message: "You win" });
+      }
+    }
+
     try {
-      const result = checkGuess(guess);
-      return result;
+      const validationStream = validateLetterByLetter();
+      for await (const chunk of validationStream) {
+        reply.raw.write(`data: ${chunk}\n\n`);
+      }
     } catch (error) {
-      return reply.code(400).send({ error: error.message });
+      console.error(error);
+    } finally {
+      reply.raw.write(`event: end\ndata: done\n\n`);
+      reply.raw.end();
     }
   });
 

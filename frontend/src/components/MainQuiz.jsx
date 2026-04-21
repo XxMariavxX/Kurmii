@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
-import { fetchDailyWordMeta, checkWord, fetchDaylyHints } from "../api";
+import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints } from "../api";
 import carrot from "../assets/carrot-before-hovers.png";
 import "../css/MainQuiz.css";
 import "../css/Header.css";
-
-
 const MAX_ROWS = 6;
 const WORD_LENGTH = 5;
 
@@ -21,6 +19,7 @@ function MainQuiz() {
   const [hintText, setHintText] = useState("");
   const [hintedLetters, setHintedLetters] = useState([]);
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     const loadGameMeta = async () => {
@@ -96,21 +95,33 @@ function MainQuiz() {
   };
 
   const submitRow = async () => {
-    if (loading || error || currentRow >= MAX_ROWS) return;
+    if (loading || error || currentRow >= MAX_ROWS || isChecking) return;
 
     const guess = guesses[currentRow];
     if (guess.length !== WORD_LENGTH) return;
 
     try {
-      const checkResult = await checkWord(guess);
-      setResults((prev) => {
-        const next = [...prev];
-        next[currentRow] = checkResult.result;
-        return next;
+      setIsChecking(true);
+
+      const rowResult = Array(WORD_LENGTH).fill(null);
+
+      await checkWordStream(guess, (data) => {
+        if (data?.type === "letter") {
+          rowResult[data.index] = data.status;
+
+          setResults((prev) => {
+            const next = [...prev];
+            next[currentRow] = [...rowResult];
+            return next;
+          });
+        }
       });
+
       setCurrentRow((prev) => prev + 1);
     } catch (err) {
       alert(err.message);
+    } finally {
+      setIsChecking(false);
     }
   };
 

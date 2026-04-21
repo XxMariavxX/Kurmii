@@ -113,6 +113,4 @@ class PriorityQueue {
   }
 }
 
-// it will be used for users to save their attempts and the best one in the week will be on the interface
-
 export default PriorityQueue;
