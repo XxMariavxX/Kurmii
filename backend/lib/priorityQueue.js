@@ -5,6 +5,14 @@ class PriorityQueue {
     this.maxSize = maxSize;
   }
 
+  size() {
+    return this.queue.length;
+  }
+
+  isFull() {
+    return this.queue.length >= this.maxSize;
+  }
+
   enqueue(item, priority) {
     this.queue.push({
       item: item,
@@ -106,3 +114,5 @@ class PriorityQueue {
 }
 
 // it will be used for users to save their attempts and the best one in the week will be on the interface
+
+export default PriorityQueue;

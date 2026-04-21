@@ -1,36 +1,55 @@
 const API_BASE = '/api';
 
 export async function fetchDailyWordMeta() {
-  const response = await fetch(`${API_BASE}/daily-word`);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+  try {
+    
+    const response = await fetch(`${API_BASE}/daily-word`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json(); // { wordLength: 5, gameId: "2026-04-01" }
+  }catch (error){
+    console.error(`Error take the word${error}`);
+    throw error;
   }
-  return response.json(); // { wordLength: 5, gameId: "2026-04-01" }
 }
 
 export async function checkWord(guess) {
-  const response = await fetch(`${API_BASE}/check-word`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ guess }),
-  });
+  try {
+    const response = await fetch(`${API_BASE}/check-word`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ guess }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error check the guess ${error}`);
+    throw error;
   }
-  return response.json();
 }
 
 export async function fetchDaylyHints(guessLetter) {
-  const response = await fetch(`${API_BASE}/hints?guessed=${encodeURIComponent(guessLetter ?? "")}`);
+  try {
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    const response = await fetch(`${API_BASE}/hints?guessed=${encodeURIComponent(guessLetter ?? "")}`);
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+  
+    return await response.json();
+  } catch (error) {
+    console.error(`Error take hint: ${error}`);
+    throw error;
   }
-
-  return response.json();
 }
