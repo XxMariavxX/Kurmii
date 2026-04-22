@@ -45,9 +45,9 @@ const runHintTask = (task, priority = 0) =>
     hintsQueue.enqueue({ task, resolve, reject }, priority);
   });
 
-export default async function (fastify, opts) {
+export default async function (fastify) {
 
-  fastify.get("/daily-word", async function (request, reply) {
+  fastify.get("/daily-word", async function () {
     return getDailyWordMeta();
   });
 

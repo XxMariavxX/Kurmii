@@ -21,6 +21,11 @@ function MainQuiz() {
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
 
+  const openHintModal = (text) => {
+    setHintText(text);
+    setIsHintModalOpen(true);
+  };
+
   useEffect(() => {
     const loadGameMeta = async () => {
       try {
@@ -38,7 +43,8 @@ function MainQuiz() {
 
   const countHint = async () => {
     if (count >= 2) {
-      return alert("You have already spent all hints 🥕");
+      openHintModal("Your hints are already used 🥕");
+      return;
     }
 
     try {
@@ -57,14 +63,12 @@ function MainQuiz() {
 
       if (data?.hint) {
         setHintedLetters((prev) => [...new Set([...prev, data.hint])]);
-        setHintText(`Hint: ${data.hint}`);
+        openHintModal(`Hint: ${data.hint}`);
       } else {
-        setHintText(data?.message || "No more hints available");
+        openHintModal(data?.message || "No more hints available");
       }
-
-      setIsHintModalOpen(true);
     } catch (err) {
-      alert(err.message);
+      openHintModal(err.message || "Failed to load hint");
     }
   };
 
@@ -115,11 +119,15 @@ function MainQuiz() {
             return next;
           });
         }
+
+        if (data?.type === "result") {
+          openHintModal("You win 🎉");
+        }
       });
 
       setCurrentRow((prev) => prev + 1);
     } catch (err) {
-      alert(err.message);
+      openHintModal(err.message || "Check failed");
     } finally {
       setIsChecking(false);
     }
