@@ -60,13 +60,23 @@ export default async function (fastify) {
       return reply.code(400).send({ error: "Invalid guess: must be a string" });
     }
 
-    let statuses; 
+    const guess = rawGuess.toUpperCase();
+
+    if (guess.length !== 5) {
+      return reply.code(400).send({ error: "Invalid guess: must be 5 letter" });
+    }
+
+    if (!validWords.has(guess)) {
+      return reply.code(400).send({ error: "Word not found in dictionary" });
+    }
+
+    let statuses;
 
     try {
-      const checkData = checkGuess(rawGuess); 
+      const checkData = checkGuess(guess);
       statuses = checkData.result;
     } catch (error) {
-      return reply.code(400).send({ error: error.message });
+      return reply.code(400).send({ error: error.message || "Invalid guess" });
     }
 
     reply.hijack();
@@ -77,13 +87,12 @@ export default async function (fastify) {
     });
 
     async function* validateLetterByLetter() {
-      let correctLetterCount = statuses.filter(s => s === "correct").length;
-      const guess = rawGuess.toUpperCase();
+      const correctLetterCount = statuses.filter(s => s === "correct").length;
 
       for (let i = 0; i < 5; i++) {
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status: statuses[i]});
+        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status: statuses[i] });
       }
 
       if (correctLetterCount === 5) {
