@@ -1,10 +1,12 @@
 import { getDailyWordMeta, checkGuess, getDailyWord } from "../controllers/wordController.js";
 import { newFilter, checkWordMatchSlowly } from "../lib/helpers.js";
 import PriorityQueue from "../lib/priorityQueue.js";
+import fiveLetterWords from "../words/fiveLetterWords.js";
 
 const HINTS_CONCURRENCY = 4;
 const hintsQueue = new PriorityQueue(50);
 let activeHints = 0;
+const validWords = new Set(fiveLetterWords.map(word => word.toUpperCase()));
 
 const processQueue = () => {
   while (activeHints < HINTS_CONCURRENCY && hintsQueue.size() > 0) {
@@ -58,33 +60,30 @@ export default async function (fastify) {
       return reply.code(400).send({ error: "Invalid guess: must be a string" });
     }
 
-    const guess = rawGuess.toUpperCase();
+    let statuses; 
 
-    if (guess.length !== 5) {
-      return reply.code(400).send({ error: "Invalid guess: must be 5 letter" });
+    try {
+      const checkData = checkGuess(rawGuess); 
+      statuses = checkData.result;
+    } catch (error) {
+      return reply.code(400).send({ error: error.message });
     }
 
-    const targetWord = getDailyWord();
-
-    reply.raw.setHeader('Content-Type', 'text/event-stream');
-    reply.raw.setHeader('Cache-Control', 'no-cache');
-    reply.raw.setHeader('Connection', 'keep-alive');
+    reply.hijack();
+    reply.raw.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    });
 
     async function* validateLetterByLetter() {
-      let correctLetterCount = 0;
+      let correctLetterCount = statuses.filter(s => s === "correct").length;
+      const guess = rawGuess.toUpperCase();
 
       for (let i = 0; i < 5; i++) {
         await new Promise(resolve => setTimeout(resolve, 200));
 
-        let status = "absent";
-        if (guess[i] === targetWord[i]) {
-          status = "correct";
-          correctLetterCount++;
-        } else if (targetWord.includes(guess[i])) {
-          status = "present";
-        }
-
-        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status });
+        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status: statuses[i]});
       }
 
       if (correctLetterCount === 5) {

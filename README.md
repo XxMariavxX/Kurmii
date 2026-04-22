@@ -4,7 +4,7 @@ A simple web-based game inspired by Wordle, where players try to guess a hidden 
 
 ## Requirements
 
-- Node.js 22 LTS
+- Node.js 24.15.0 LTS
 
 ## 🎯 About the Project
 

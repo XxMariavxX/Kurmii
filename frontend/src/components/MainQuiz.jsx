@@ -121,7 +121,7 @@ function MainQuiz() {
         }
 
         if (data?.type === "result") {
-          openHintModal("You win 🎉");
+          setTimeout(() => openHintModal("You win 🎉"), 200);
         }
       });
 
