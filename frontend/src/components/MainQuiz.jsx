@@ -5,8 +5,16 @@ import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints } from "../api";
 import carrot from "../assets/carrot-before-hovers.png";
 import "../css/MainQuiz.css";
 import "../css/Header.css";
+
 const MAX_ROWS = 6;
 const WORD_LENGTH = 5;
+
+const getNextMidnightDelay = () => {
+  const now = new Date();
+  const nextMidnight = new Date(now);
+  nextMidnight.setHours(24, 0, 0, 0);
+  return nextMidnight.getTime() - now.getTime();
+};
 
 function MainQuiz() {
   const [gameMeta, setGameMeta] = useState(null);
@@ -39,6 +47,38 @@ function MainQuiz() {
     };
 
     loadGameMeta();
+  }, []);
+
+  useEffect(() => {
+    let timeoutId;
+
+    const refreshGameAtMidnight = () => {
+      timeoutId = setTimeout(async () => {
+        try {
+          setLoading(true);
+          const meta = await fetchDailyWordMeta();
+          setGameMeta(meta);
+          setGuesses(Array(MAX_ROWS).fill(""));
+          setResults(Array(MAX_ROWS).fill(null));
+          setCurrentRow(0);
+          setCount(0);
+          setHintedLetters([]);
+          setHintText("");
+          setIsHintModalOpen(false);
+          setError(null);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+          refreshGameAtMidnight();
+        }
+      }, getNextMidnightDelay());
+    };
+
+    refreshGameAtMidnight();
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const countHint = async () => {

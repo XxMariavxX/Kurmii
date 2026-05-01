@@ -1,12 +1,11 @@
 import { getDailyWordMeta, checkGuess, getDailyWord } from "../controllers/wordController.js";
 import { newFilter, checkWordMatchSlowly } from "../lib/helpers.js";
 import PriorityQueue from "../lib/priorityQueue.js";
-import fiveLetterWords from "../words/fiveLetterWords.js";
+import { validWords } from "../lib/wordDictionary.js";
 
 const HINTS_CONCURRENCY = 4;
 const hintsQueue = new PriorityQueue(50);
 let activeHints = 0;
-const validWords = new Set(fiveLetterWords.map(word => word.toUpperCase()));
 
 const processQueue = () => {
   while (activeHints < HINTS_CONCURRENCY && hintsQueue.size() > 0) {
@@ -161,4 +160,5 @@ export default async function (fastify) {
       return reply.code(500).send({ error: "error " + error.message });
     }
   });
+
 }

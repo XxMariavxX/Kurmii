@@ -1,13 +1,21 @@
 import { dailyWord } from "../services/dailyWordGenerator.js";
-import fiveLetterWords from "../words/fiveLetterWords.js";
+import eventBus from "../lib/event.js";
+import { validWords } from "../lib/wordDictionary.js";
 import memoize from "../lib/memoize.js";
 
-const validWords = new Set(fiveLetterWords.map(word => word.toUpperCase()));
+let currentDailyWord = dailyWord().next().value.toUpperCase();
 
-export const getDailyWord = () => {
-  const dw = dailyWord();
-  return dw.next().value.toUpperCase();
-};
+eventBus.on("word:changed", ({ newWord }) => {
+  if (typeof newWord === "string" && newWord.length === 5) {
+    currentDailyWord = newWord.toUpperCase();
+  }
+});
+
+eventBus.on("word:changed", () => {
+  console.log("[СИСТЕМА] Слово дня успішно оновлено!");
+});
+
+export const getDailyWord = () => currentDailyWord;
 
 export const getDailyWordMeta = () => {
   const today = new Date().toISOString().split('T')[0];
