@@ -13,4 +13,23 @@ function* generatorWord(words) {
   }
 }
 
+function timeoutIterator(iterator, timeoutSeconds, onValue) {
+  const deadline = Date.now() + timeoutSeconds * 1000;
+  let count = 0;
+
+  while (Date.now() < deadline) {
+    const { value, done } = iterator.next();
+
+    if (done) break;
+
+    count += 1;
+    if (typeof onValue === "function") {
+      onValue(value, count);
+    }
+  }
+
+  return count;
+}
+
+export { timeoutIterator };
 export default generatorWord;
