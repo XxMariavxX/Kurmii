@@ -1,6 +1,9 @@
 import fp from "fastify-plugin";
 import eventBus from "../lib/event.js";
 import { dailyWord } from "../services/dailyWordGenerator.js";
+import createLogger from "../lib/logger.js";
+
+const log = createLogger({ level: "INFO" });
 
 const getNextMidnightDelay = () => {
   const now = new Date();
@@ -9,7 +12,9 @@ const getNextMidnightDelay = () => {
   return nextMidnight.getTime() - now.getTime();
 };
 
-const getCurrentWord = () => dailyWord().next().value.toUpperCase();
+const getCurrentWord = log(function getCurrentWord() {
+  return dailyWord().next().value.toUpperCase();
+});
 
 async function dailyWordRotation(fastify) {
   let timeoutId;
