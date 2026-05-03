@@ -1,7 +1,12 @@
-import { getDailyWordMeta, checkGuess, getDailyWord } from "../controllers/wordController.js";
+import {
+  getDailyWordMeta,
+  checkGuess,
+  getDailyWord,
+} from "../controllers/wordController.js";
 import { newFilter, checkWordMatchSlowly } from "../lib/helpers.js";
 import PriorityQueue from "../lib/priorityQueue.js";
 import { validWords } from "../lib/wordDictionary.js";
+import loginUser from "../controllers/authController.js";
 
 const HINTS_CONCURRENCY = 4;
 const hintsQueue = new PriorityQueue(50);
@@ -47,7 +52,6 @@ const runHintTask = (task, priority = 0) =>
   });
 
 export default async function (fastify) {
-
   fastify.get("/daily-word", async function () {
     return getDailyWordMeta();
   });
@@ -80,18 +84,23 @@ export default async function (fastify) {
 
     reply.hijack();
     reply.raw.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
     });
 
     async function* validateLetterByLetter() {
-      const correctLetterCount = statuses.filter(s => s === "correct").length;
+      const correctLetterCount = statuses.filter((s) => s === "correct").length;
 
       for (let i = 0; i < 5; i++) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
-        yield JSON.stringify({ type: "letter", index: i, letter: guess[i], status: statuses[i] });
+        yield JSON.stringify({
+          type: "letter",
+          index: i,
+          letter: guess[i],
+          status: statuses[i],
+        });
       }
 
       if (correctLetterCount === 5) {
@@ -115,10 +124,10 @@ export default async function (fastify) {
   fastify.get("/hints", async function (request, reply) {
     const { guessed } = request.query;
 
-    const guessedArray = guessed ? guessed.toUpperCase().split(',') : [];
+    const guessedArray = guessed ? guessed.toUpperCase().split(",") : [];
 
     const dailyWord = getDailyWord();
-    const lettersArray = dailyWord.split('');
+    const lettersArray = dailyWord.split("");
 
     try {
       const result = await runHintTask(async () => {
@@ -133,14 +142,18 @@ export default async function (fastify) {
           const availableHint = await newFilter(
             lettersArray,
             (letter, sig) => checkWordMatchSlowly(letter, guessedArray, sig),
-            signal
+            signal,
           );
 
           if (availableHint.length === 0) {
-            return { status: 200, body: { hint: null, message: "You guess all letters" } };
+            return {
+              status: 200,
+              body: { hint: null, message: "You guess all letters" },
+            };
           }
 
-          const randomHint = availableHint[Math.floor(Math.random() * availableHint.length)];
+          const randomHint =
+            availableHint[Math.floor(Math.random() * availableHint.length)];
           return { status: 200, body: { hint: randomHint } };
         } catch (error) {
           if (error.name === "AbortError") {
@@ -155,10 +168,24 @@ export default async function (fastify) {
       return reply.code(result.status).send(result.body);
     } catch (error) {
       if (error.message === "Hints queue is full") {
-        return reply.code(429).send({ error: "Too many hint requests. Try again later." });
+        return reply
+          .code(429)
+          .send({ error: "Too many hint requests. Try again later." });
       }
       return reply.code(500).send({ error: "error " + error.message });
     }
+
   });
 
+  fastify.post("/api/login", async (request, reply) => {
+    const { username, password } = request.body;
+
+    const result = loginUser(username, password);
+
+    if (result.success) {
+      return reply.send(result);
+    } else {
+      return reply.code(401).send(result);
+    }
+  });
 }

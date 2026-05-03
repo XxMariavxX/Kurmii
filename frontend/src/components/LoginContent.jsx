@@ -12,3 +12,5 @@ function LoginContent () {
     </main>
   )
 }
+
+export default LoginContent;

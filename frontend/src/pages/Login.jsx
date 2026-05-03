@@ -1,8 +1,11 @@
+import LoginContent from "../components/LoginContent";
 
-function NotFound() {
+function Submit() {
   return (
     <>
-      <h1>"404"</h1>
+      <LoginContent/>
     </>
   )
 }
+
+export default Submit;
