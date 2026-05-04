@@ -1,5 +1,9 @@
 # Kurmi — Daily Word Guess Game
 
+<p align="center">
+  <img src="frontend/src/assets/favicon.ico" alt="Kurmi" width="80" />
+</p>
+
 A full-stack Wordle-inspired game where players have 6 attempts to guess a hidden 5-letter word that changes every day at midnight.
 
 ## Tech Stack
