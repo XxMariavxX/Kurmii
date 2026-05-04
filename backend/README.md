@@ -3,22 +3,22 @@ This project was bootstrapped with Fastify-CLI.
 
 ## Requirements
 
-- Node.js 22 LTS
+- Node.js >= 22
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm run dev`
+### `pnpm dev`
 
 To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:3001](http://localhost:3001) to view it in the browser.
 
-### `npm start`
+### `pnpm start`
 
 For production mode
 
-### `npm run test`
+### `pnpm test`
 
 Run the test cases.
 
