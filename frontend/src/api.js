@@ -1,21 +1,66 @@
 const API_BASE = "/api";
 
+const TOKEN_KEY = "auth_token";
+
+export const setAuthToken = (token) => localStorage.setItem(TOKEN_KEY, token);
+export const getAuthToken = () => localStorage.getItem(TOKEN_KEY);
+export const clearAuthToken = () => localStorage.removeItem(TOKEN_KEY);
+
+const authHeaders = () => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 const requestJson = async (url, options) => {
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    ...options,
+    headers: { ...authHeaders(), ...options?.headers },
+  });
 
   if (!response.ok) {
+    if (response.status === 401) clearAuthToken();
     let message = `HTTP error! status: ${response.status}`;
     try {
       const errorData = await response.json();
       message = errorData?.error || message;
-    } catch(error){
-      console.error("Error")
+    } catch {
+      // ignore parse error
     }
     throw new Error(message);
   }
 
   return response.json();
 };
+
+export async function login(username, password) {
+  const data = await requestJson(`${API_BASE}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  setAuthToken(data.token);
+  return data;
+}
+
+export async function register(username, password) {
+  const data = await requestJson(`${API_BASE}/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+  setAuthToken(data.token);
+  return data;
+}
+
+export async function logout() {
+  try {
+    await requestJson(`${API_BASE}/logout`, { method: "POST" });
+  } catch {
+    // token already invalid or missing — treat as logged out
+  } finally {
+    clearAuthToken();
+  }
+}
 
 export async function fetchDailyWordMeta() {
   try {
@@ -43,6 +88,7 @@ export async function checkWordStream(guess, onChunk) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...authHeaders(),
       },
       body: JSON.stringify({ guess }),
     });
