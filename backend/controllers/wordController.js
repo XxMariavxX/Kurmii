@@ -12,7 +12,7 @@ eventBus.on("word:changed", ({ newWord }) => {
 });
 
 eventBus.on("word:changed", () => {
-  console.log("[СИСТЕМА] Слово дня успішно оновлено!");
+  console.log("System: the word is changed");
 });
 
 export const getDailyWord = () => currentDailyWord;

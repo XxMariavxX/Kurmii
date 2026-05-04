@@ -26,21 +26,6 @@ export async function fetchDailyWordMeta() {
   }
 }
 
-export async function checkWord(guess) {
-  try {
-    return await requestJson(`${API_BASE}/check-word`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ guess }),
-    });
-  } catch (error) {
-    console.error("Error check word", error);
-    throw error;
-  }
-}
-
 export async function fetchDaylyHints(guessLetter) {
   try {
     return await requestJson(
