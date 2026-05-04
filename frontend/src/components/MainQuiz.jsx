@@ -28,9 +28,11 @@ function MainQuiz() {
   const [hintedLetters, setHintedLetters] = useState([]);
   const [isHintModalOpen, setIsHintModalOpen] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [showCarrotTitle, setShowCarrotTitle] = useState(true);
 
-  const openHintModal = (text) => {
+  const openHintModal = (text, withCarrotTitle = true) => {
     setHintText(text);
+    setShowCarrotTitle(withCarrotTitle);
     setIsHintModalOpen(true);
   };
 
@@ -167,7 +169,7 @@ function MainQuiz() {
 
       setCurrentRow((prev) => prev + 1);
     } catch (err) {
-      openHintModal(err.message || "Check failed");
+      openHintModal(err.message || "Check failed", false);
     } finally {
       setIsChecking(false);
     }
@@ -224,7 +226,7 @@ function MainQuiz() {
                 >
                   ×
                 </button>
-                <h3 className="hint-modal-title">Carrot hint</h3>
+                {showCarrotTitle && <h3 className="hint-modal-title">Carrot hint</h3>}
                 <p className="hint-modal-text">{hintText}</p>
               </div>
             </div>
