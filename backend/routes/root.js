@@ -6,7 +6,19 @@ import {
 import { newFilter, checkWordMatchSlowly } from "../lib/helpers.js";
 import PriorityQueue from "../lib/priorityQueue.js";
 import { validWords } from "../lib/wordDictionary.js";
-import loginUser from "../controllers/authController.js";
+import { loginUser, verifyToken, revokeToken, registerUser } from "../controllers/authController.js";
+
+const authenticate = async (request, reply) => {
+  const auth = request.headers.authorization;
+  if (!auth?.startsWith("Bearer ")) {
+    return reply.code(401).send({ error: "Unauthorized" });
+  }
+  const user = verifyToken(auth.slice(7));
+  if (!user) {
+    return reply.code(401).send({ error: "Invalid or expired token" });
+  }
+  request.user = user;
+};
 
 const HINTS_CONCURRENCY = 4;
 const hintsQueue = new PriorityQueue(50);
@@ -56,7 +68,7 @@ export default async function (fastify) {
     return getDailyWordMeta();
   });
 
-  fastify.post("/check-word", async function (request, reply) {
+  fastify.post("/check-word", { preHandler: authenticate }, async function (request, reply) {
     const rawGuess = request.body?.guess;
 
     if (!rawGuess || typeof rawGuess !== "string") {
@@ -121,7 +133,7 @@ export default async function (fastify) {
     }
   });
 
-  fastify.get("/hints", async function (request, reply) {
+  fastify.get("/hints", { preHandler: authenticate }, async function (request, reply) {
     const { guessed } = request.query;
 
     const guessedArray = guessed ? guessed.toUpperCase().split(",") : [];
@@ -177,7 +189,14 @@ export default async function (fastify) {
 
   });
 
-  fastify.post("/api/login", async (request, reply) => {
+  fastify.post("/register", async (request, reply) => {
+    const { username, password } = request.body ?? {};
+    const result = registerUser(username, password);
+    if (result.success) return reply.code(201).send(result);
+    return reply.code(400).send(result);
+  });
+
+  fastify.post("/login", async (request, reply) => {
     const { username, password } = request.body;
 
     const result = loginUser(username, password);
@@ -187,5 +206,11 @@ export default async function (fastify) {
     } else {
       return reply.code(401).send(result);
     }
+  });
+
+  fastify.post("/logout", { preHandler: authenticate }, async (request, reply) => {
+    const token = request.headers.authorization.slice(7);
+    revokeToken(token);
+    return reply.send({ success: true });
   });
 }

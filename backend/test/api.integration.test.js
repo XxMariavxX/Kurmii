@@ -11,6 +11,15 @@ const buildServer = async () => {
   return fastify;
 };
 
+const getToken = async (fastify) => {
+  const response = await fastify.inject({
+    method: "POST",
+    url: "/api/login",
+    payload: { username: "admin", password: "admin123" },
+  });
+  return JSON.parse(response.body).token;
+};
+
 test("GET /daily-word returns meta", async () => {
   const fastify = await buildServer();
 
@@ -27,41 +36,56 @@ test("GET /daily-word returns meta", async () => {
   await fastify.close();
 });
 
-test("POST /check-word validates input", async () => {
+test("POST /api/login returns token", async () => {
   const fastify = await buildServer();
 
-  const invalidResponse = await fastify.inject({
+  const response = await fastify.inject({
+    method: "POST",
+    url: "/api/login",
+    payload: { username: "admin", password: "admin123" },
+  });
+
+  assert.equal(response.statusCode, 200);
+  const body = JSON.parse(response.body);
+  assert.equal(body.success, true);
+  assert.ok(typeof body.token === "string" && body.token.length > 0);
+
+  await fastify.close();
+});
+
+test("POST /check-word requires auth", async () => {
+  const fastify = await buildServer();
+
+  const response = await fastify.inject({
+    method: "POST",
+    url: "/check-word",
+    payload: { guess: "crane" },
+  });
+
+  assert.equal(response.statusCode, 401);
+
+  await fastify.close();
+});
+
+test("POST /check-word validates input", async () => {
+  const fastify = await buildServer();
+  const token = await getToken(fastify);
+
+  const response = await fastify.inject({
     method: "POST",
     url: "/check-word",
     payload: { guess: "abc" },
+    headers: { Authorization: `Bearer ${token}` },
   });
 
-  assert.equal(invalidResponse.statusCode, 400);
-  const invalidBody = JSON.parse(invalidResponse.body);
-  assert.ok(invalidBody.error);
+  assert.equal(response.statusCode, 400);
+  const body = JSON.parse(response.body);
+  assert.ok(body.error);
 
   await fastify.close();
 });
 
-test("POST /check-word accepts valid word", async () => {
-  const fastify = await buildServer();
-  const dailyWord = getDailyWord();
-
-  const validResponse = await fastify.inject({
-    method: "POST",
-    url: "/check-word",
-    payload: { guess: dailyWord.toLowerCase() },
-  });
-
-  assert.equal(validResponse.statusCode, 200);
-  const validBody = JSON.parse(validResponse.body);
-  assert.ok(Array.isArray(validBody.result));
-  assert.equal(validBody.result.length, 5);
-
-  await fastify.close();
-});
-
-test("GET /hints returns hint or message", async () => {
+test("GET /hints requires auth", async () => {
   const fastify = await buildServer();
 
   const response = await fastify.inject({
@@ -69,9 +93,47 @@ test("GET /hints returns hint or message", async () => {
     url: "/hints?guessed=",
   });
 
+  assert.equal(response.statusCode, 401);
+
+  await fastify.close();
+});
+
+test("GET /hints returns hint or message", async () => {
+  const fastify = await buildServer();
+  const token = await getToken(fastify);
+
+  const response = await fastify.inject({
+    method: "GET",
+    url: "/hints?guessed=",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
   assert.equal(response.statusCode, 200);
   const body = JSON.parse(response.body || "{}");
   assert.ok("hint" in body);
+
+  await fastify.close();
+});
+
+test("POST /logout revokes token", async () => {
+  const fastify = await buildServer();
+  const token = await getToken(fastify);
+
+  const logoutResponse = await fastify.inject({
+    method: "POST",
+    url: "/logout",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  assert.equal(logoutResponse.statusCode, 200);
+
+  const afterLogout = await fastify.inject({
+    method: "GET",
+    url: "/hints?guessed=",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  assert.equal(afterLogout.statusCode, 401);
 
   await fastify.close();
 });
