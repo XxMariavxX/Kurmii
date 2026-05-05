@@ -2,10 +2,12 @@ import { useNavigate } from "react-router-dom";
 import ico from "../assets/favicon.ico";
 import "../css/MainHome.css";
 import Header from "../components/Header";
+import { getProfile } from "../hooks/useProfile.js";
 
 function MainHome() {
   const navigate = useNavigate();
   const now = new Date();
+  const profile = getProfile();
 
   const formattedDate = now.toLocaleDateString("en-GB", {
     day: "numeric",
@@ -32,6 +34,12 @@ function MainHome() {
               className="quiz-daily-word"
             >
               Daily word
+            </button>
+            <button
+              onClick={() => navigate("/profile")}
+              className="quiz-daily-word profile-btn"
+            >
+              {profile.username ? `${profile.username}'s profile` : "Profile"}
             </button>
             <p className="today">{formattedDate}</p>
           </div>

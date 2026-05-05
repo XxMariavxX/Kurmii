@@ -56,6 +56,16 @@
   color: #414141;
 }
 
+.profile-btn {
+  background-color: #5e548e;
+  animation: none;
+}
+
+.profile-btn:hover {
+  background-color: #7b6fb0;
+  color: #f8efde;
+}
+
 .ico:hover {
   cursor: pointer;
 }
