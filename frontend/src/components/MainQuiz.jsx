@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
-import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints } from "../api";
+import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints, logout, getAuthToken } from "../api";
+import { useGameStorage } from "../hooks/useGameStorage.js";
+import { recordGame } from "../hooks/useProfile.js";
 import carrot from "../assets/carrot-before-hovers.png";
 import "../css/MainQuiz.css";
 import "../css/Header.css";
@@ -17,238 +20,193 @@ const getNextMidnightDelay = () => {
 };
 
 function MainQuiz() {
-  const [gameMeta, setGameMeta] = useState(null);
-  const [guesses, setGuesses] = useState(Array(MAX_ROWS).fill(""));
-  const [results, setResults] = useState(Array(MAX_ROWS).fill(null));
-  const [currentRow, setCurrentRow] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [count, setCount] = useState(0);
-  const [hintText, setHintText] = useState("");
-  const [hintedLetters, setHintedLetters] = useState([]);
-  const [isHintModalOpen, setIsHintModalOpen] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
-  const [showCarrotTitle, setShowCarrotTitle] = useState(true);
+  const navigate = useNavigate();
+  const todayId = new Date().toLocaleDateString("sv-SE");
+  const { state, update, reset } = useGameStorage(todayId);
+
+  const {
+    guesses, results, currentRow,
+    hintCount, hintedLetters,
+    isHintModalOpen, hintText, showCarrotTitle,
+    isChecking, loading, error, finished,
+  } = state;
+
+  const isCheckingRef = useRef(false);
+
+  const redirectIfUnauthorized = (err) => {
+    if (/unauthorized|401/i.test(err?.message)) {
+      navigate("/submit");
+      return true;
+    }
+    return false;
+  };
 
   const openHintModal = (text, withCarrotTitle = true) => {
-    setHintText(text);
-    setShowCarrotTitle(withCarrotTitle);
-    setIsHintModalOpen(true);
+    update({ isHintModalOpen: true, hintText: text, showCarrotTitle: withCarrotTitle });
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/submit");
   };
 
   useEffect(() => {
+    if (!getAuthToken()) { navigate("/submit"); return; }
     const loadGameMeta = async () => {
       try {
-        const meta = await fetchDailyWordMeta();
-        setGameMeta(meta);
-        setLoading(false);
+        await fetchDailyWordMeta();
+        update({ loading: false, error: null });
       } catch (err) {
-        setError(err.message);
-        setLoading(false);
+        update({ loading: false, error: err.message });
       }
     };
-
-    loadGameMeta();
+    if (loading) loadGameMeta();
   }, []);
 
   useEffect(() => {
     let timeoutId;
-
-    const refreshGameAtMidnight = () => {
-      timeoutId = setTimeout(async () => {
-        try {
-          setLoading(true);
-          const meta = await fetchDailyWordMeta();
-          setGameMeta(meta);
-          setGuesses(Array(MAX_ROWS).fill(""));
-          setResults(Array(MAX_ROWS).fill(null));
-          setCurrentRow(0);
-          setCount(0);
-          setHintedLetters([]);
-          setHintText("");
-          setIsHintModalOpen(false);
-          setError(null);
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setLoading(false);
-          refreshGameAtMidnight();
-        }
+    const scheduleReset = () => {
+      timeoutId = setTimeout(() => {
+        reset();
+        scheduleReset();
       }, getNextMidnightDelay());
     };
-
-    refreshGameAtMidnight();
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    scheduleReset();
+    return () => clearTimeout(timeoutId);
   }, []);
 
   const countHint = async () => {
-    if (count >= 2) {
+    if (hintCount >= 2) {
       openHintModal("Your hints are already used 🥕");
       return;
     }
-
     try {
       const guessedFromRows = guesses
-        .join("")
-        .toUpperCase()
-        .split("")
-        .filter((char) => /^[A-Z]$/.test(char));
-
+        .join("").toUpperCase().split("")
+        .filter((c) => /^[A-Z]$/.test(c));
       const uniqueGuessed = [...new Set([...guessedFromRows, ...hintedLetters])];
-      const guessedParam = uniqueGuessed.join(",");
-
-      const data = await fetchDaylyHints(guessedParam);
-
-      setCount((prev) => prev + 1);
-
+      const data = await fetchDaylyHints(uniqueGuessed.join(","));
+      const newCount = hintCount + 1;
       if (data?.hint) {
-        setHintedLetters((prev) => [...new Set([...prev, data.hint])]);
+        update({ hintCount: newCount, hintedLetters: [...new Set([...hintedLetters, data.hint])] });
         openHintModal(`Hint: ${data.hint}`);
       } else {
+        update({ hintCount: newCount });
         openHintModal(data?.message || "No more hints available");
       }
     } catch (err) {
-      openHintModal(err.message || "Failed to load hint");
+      if (!redirectIfUnauthorized(err))
+        openHintModal(err.message || "Failed to load hint");
     }
   };
 
   const addLetter = (letter) => {
-    if (loading || error || currentRow >= MAX_ROWS) return;
-
-    setGuesses((prev) => {
-      const row = prev[currentRow];
-      if (row.length >= WORD_LENGTH) return prev;
-
-      const next = [...prev];
-      next[currentRow] = `${row}${letter}`;
-      return next;
-    });
+    if (loading || error || currentRow >= MAX_ROWS || finished) return;
+    const row = guesses[currentRow];
+    if (row.length >= WORD_LENGTH) return;
+    const next = [...guesses];
+    next[currentRow] = `${row}${letter}`;
+    update({ guesses: next });
   };
 
   const removeLetter = () => {
-    if (loading || error || currentRow >= MAX_ROWS) return;
-
-    setGuesses((prev) => {
-      const row = prev[currentRow];
-      if (row.length === 0) return prev;
-
-      const next = [...prev];
-      next[currentRow] = row.slice(0, -1);
-      return next;
-    });
+    if (loading || error || currentRow >= MAX_ROWS || finished) return;
+    const row = guesses[currentRow];
+    if (row.length === 0) return;
+    const next = [...guesses];
+    next[currentRow] = row.slice(0, -1);
+    update({ guesses: next });
   };
 
   const submitRow = async () => {
-    if (loading || error || currentRow >= MAX_ROWS || isChecking) return;
-
+    if (loading || error || currentRow >= MAX_ROWS || isCheckingRef.current || finished) return;
     const guess = guesses[currentRow];
     if (guess.length !== WORD_LENGTH) return;
 
-    try {
-      setIsChecking(true);
+    isCheckingRef.current = true;
+    update({ isChecking: true });
 
+    try {
       const rowResult = Array(WORD_LENGTH).fill(null);
 
       await checkWordStream(guess, (data) => {
         if (data?.type === "letter") {
           rowResult[data.index] = data.status;
-
-          setResults((prev) => {
-            const next = [...prev];
-            next[currentRow] = [...rowResult];
-            return next;
-          });
+          const nextResults = [...results];
+          nextResults[currentRow] = [...rowResult];
+          update({ results: nextResults });
         }
-
         if (data?.type === "result") {
+          const nextRow = currentRow + 1;
+          const nextResults = [...results];
+          nextResults[currentRow] = [...rowResult];
+          update({ currentRow: nextRow, results: nextResults, finished: true });
+          recordGame({ gameId: todayId, guesses, results: nextResults, won: true, hintsUsed: hintCount });
           setTimeout(() => openHintModal("You win 🎉"), 200);
         }
       });
 
-      setCurrentRow((prev) => prev + 1);
+      const nextRow = currentRow + 1;
+      update({ currentRow: nextRow });
+
+      if (nextRow >= MAX_ROWS && !finished) {
+        update({ finished: true });
+        recordGame({ gameId: todayId, guesses, results, won: false, hintsUsed: hintCount });
+      }
     } catch (err) {
-      openHintModal(err.message || "Check failed", false);
+      if (!redirectIfUnauthorized(err))
+        openHintModal(err.message || "Check failed", false);
     } finally {
-      setIsChecking(false);
+      isCheckingRef.current = false;
+      update({ isChecking: false });
     }
   };
 
   useEffect(() => {
     const onKeyDown = (event) => {
       const { key } = event;
-
-      if (/^[a-zA-Z]$/.test(key)) {
-        event.preventDefault();
-        addLetter(key.toUpperCase());
-        return;
-      }
-
-      if (key === "Backspace") {
-        event.preventDefault();
-        removeLetter();
-        return;
-      }
-
-      if (key === "Enter") {
-        event.preventDefault();
-        submitRow();
-      }
+      if (/^[a-zA-Z]$/.test(key)) { event.preventDefault(); addLetter(key.toUpperCase()); return; }
+      if (key === "Backspace") { event.preventDefault(); removeLetter(); return; }
+      if (key === "Enter") { event.preventDefault(); submitRow(); }
     };
-
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [currentRow, guesses, loading, error]);
+  }, [currentRow, guesses, loading, error, finished]);
 
-  if (loading) return <div>Loading game...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="loading-screen">Loading game...</div>;
+  if (error) return <div className="error-screen">Error: {error}</div>;
 
   return (
     <div>
       <main>
         <section className="section2">
           <header className="block">
-            <p className="game-id">Game ID: {gameMeta?.gameId}</p>
-            <button type="button" className="help-carrot quiz-help-carrot" aria-label="Help" onClick = {countHint} disabled={count >= 2}>
-              <img src={carrot} title="help" alt="help-carrot" />
-            </button>
+            <p className="game-id">Game ID: {todayId}</p>
+            <div className="header-actions">
+              <button type="button" className="help-carrot quiz-help-carrot" aria-label="Help" onClick={countHint} disabled={hintCount >= 2}>
+                <img src={carrot} title="help" alt="help-carrot" />
+              </button>
+              <button type="button" className="logout-btn" onClick={handleLogout}>Logout</button>
+            </div>
           </header>
 
-          {isHintModalOpen ? (
-            <div className="hint-modal-overlay" onClick={() => setIsHintModalOpen(false)}>
-              <div className="hint-modal" onClick={(event) => event.stopPropagation()}>
-                <button
-                  type="button"
-                  className="hint-modal-close"
-                  aria-label="Close hint"
-                  onClick={() => setIsHintModalOpen(false)}
-                >
-                  ×
-                </button>
+          {isHintModalOpen && (
+            <div className="hint-modal-overlay" onClick={() => update({ isHintModalOpen: false })}>
+              <div className="hint-modal" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="hint-modal-close" aria-label="Close hint" onClick={() => update({ isHintModalOpen: false })}>×</button>
                 {showCarrotTitle && <h3 className="hint-modal-title">Carrot hint</h3>}
                 <p className="hint-modal-text">{hintText}</p>
               </div>
             </div>
-          ) : null}
+          )}
 
           <div className="quiz">
             {Array.from({ length: MAX_ROWS }).map((_, index) => (
-              <BoxQuiz
-                key={index}
-                guess={guesses[index]}
-                result={results[index]}
-              />
+              <BoxQuiz key={index} guess={guesses[index]} result={results[index]} />
             ))}
           </div>
-          <KeyBoard
-            onKeyPress={addLetter}
-            onBackspace={removeLetter}
-            onEnter={submitRow}
-          />
-
+          <KeyBoard onKeyPress={addLetter} onBackspace={removeLetter} onEnter={submitRow} />
         </section>
-        <div className="entrance"></div>
       </main>
     </div>
   );
