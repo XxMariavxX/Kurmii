@@ -6,22 +6,28 @@
 .section2 {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  gap: 50px;
   align-items: center;
   background-color: #f8efde;
   min-height: 100vh;
   width: 70%;
   margin: 0 auto;
+  padding: clamp(20px, 4vh, 48px) clamp(12px, 2vw, 24px) 40px;
+  gap: clamp(20px, 3vh, 36px);
 }
 
 .block {
-  width: 80%;
+  width: 100%;
+  max-width: 500px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .game-id {
@@ -34,6 +40,26 @@
   background: transparent;
   border: none;
   padding: 0;
+  line-height: 0;
+}
+
+.logout-btn {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 2px solid #9984C9;
+  background: transparent;
+  color: #5e548e;
+  font-family: "Comfortaa", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #9984C9;
+  color: #f8efde;
 }
 
 .hint-text {
