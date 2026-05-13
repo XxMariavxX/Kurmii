@@ -118,6 +118,51 @@
   gap: 5px;
 }
 
+.definition-btn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 8px;
+  border: 2px solid #9984C9;
+  background: transparent;
+  color: #5e548e;
+  font-family: "Comfortaa", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.definition-btn:hover {
+  background-color: #9984C9;
+  color: #f8efde;
+}
+
+.definition-modal {
+  max-width: 420px;
+  text-align: left;
+}
+
+.definition-meaning {
+  margin-top: 10px;
+  border-top: 1px solid #e8dcc8;
+  padding-top: 8px;
+}
+
+.definition-pos {
+  margin: 0 0 4px;
+  font-style: italic;
+  color: #9984C9;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.definition-text {
+  margin: 0 0 4px;
+  color: #2a2a2a;
+  font-size: 0.9rem;
+}
+
 .keyboard {
   display: grid;
   gap: 8px;

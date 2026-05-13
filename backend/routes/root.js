@@ -213,4 +213,42 @@ export default async function (fastify) {
     revokeToken(token);
     return reply.send({ success: true });
   });
+
+  fastify.get("/word-definition", { preHandler: authenticate }, async function (request, reply) {
+    const word = request.query.word?.toUpperCase();
+
+    if (!word || typeof word !== "string" || word.length !== 5) {
+      return reply.code(400).send({ error: "Invalid word: must be a 5-letter string" });
+    }
+
+    if (!validWords.has(word)) {
+      return reply.code(400).send({ error: "Word not found in dictionary" });
+    }
+
+    try {
+      const response = await fastify.serviceProxy(
+        `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`,
+        {},
+        { rateLimit: 30, rateLimitKey: "definition" }
+      );
+
+      if (!response.ok) {
+        return reply.code(404).send({ error: "Definition not found for this word" });
+      }
+
+      const data = await response.json();
+      const entry = data[0];
+      const meanings = (entry?.meanings ?? []).map((m) => ({
+        partOfSpeech: m.partOfSpeech,
+        definitions: m.definitions.slice(0, 2).map((d) => d.definition),
+      }));
+
+      return reply.send({ word, meanings });
+    } catch (error) {
+      if (error.code === "RATE_LIMIT") {
+        return reply.code(429).send({ error: "Too many definition requests. Try again later." });
+      }
+      return reply.code(500).send({ error: "Failed to fetch word definition" });
+    }
+  });
 }

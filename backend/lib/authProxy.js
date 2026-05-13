@@ -1,3 +1,7 @@
+import createLogger from "./logger.js";
+
+const log = createLogger({ level: "INFO" });
+
 const strategies = {
   bearer: (token) => ({ Authorization: `Bearer ${token}` }),
   apikey: (key, headerName = "X-API-Key") => ({ [headerName]: key }),
@@ -24,6 +28,10 @@ function createAuthProxy(credential, getToken) {
 
     return entry.count <= maxPerMinute;
   };
+
+  const logRequest = log(async function proxyRequest(url, strategy, statusCode) {
+    return { url, strategy, statusCode };
+  });
 
   return async function proxyFetch(url, options = {}, proxyOptions = {}) {
     const { strategy = "bearer", headerName, rateLimit = Infinity, rateLimitKey = "default" } = proxyOptions;
@@ -57,9 +65,12 @@ function createAuthProxy(credential, getToken) {
         ...options.headers,
         ...strategies.bearer(freshToken),
       };
-      return fetch(url, mergedOptions);
+      const retryResponse = await fetch(url, mergedOptions);
+      logRequest(url, strategy, retryResponse.status).catch(() => {});
+      return retryResponse;
     }
 
+    logRequest(url, strategy, response.status).catch(() => {});
     return response;
   };
 }

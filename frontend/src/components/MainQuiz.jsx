@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import BoxQuiz from "./BoxQuiz.jsx";
 import KeyBoard from "./Keyboard.jsx";
-import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints, logout, getAuthToken } from "../api";
+import { fetchDailyWordMeta, checkWordStream, fetchDaylyHints, fetchWordDefinition, logout, getAuthToken } from "../api";
 import { useGameStorage } from "../hooks/useGameStorage.js";
 import { recordGame } from "../hooks/useProfile.js";
 import carrot from "../assets/carrot-before-hovers.png";
@@ -29,6 +29,7 @@ function MainQuiz() {
     hintCount, hintedLetters,
     isHintModalOpen, hintText, showCarrotTitle,
     isChecking, loading, error, finished,
+    definitionData, isDefinitionOpen,
   } = state;
 
   const isCheckingRef = useRef(false);
@@ -39,6 +40,17 @@ function MainQuiz() {
       return true;
     }
     return false;
+  };
+
+  const handleDefinition = async () => {
+    const lastGuess = guesses[currentRow - 1];
+    if (!lastGuess) return;
+    try {
+      const data = await fetchWordDefinition(lastGuess);
+      update({ definitionData: data, isDefinitionOpen: true });
+    } catch (err) {
+      openHintModal(err.message || "Failed to load definition", false);
+    }
   };
 
   const openHintModal = (text, withCarrotTitle = true) => {
@@ -189,6 +201,29 @@ function MainQuiz() {
               <button type="button" className="logout-btn" onClick={handleLogout}>Logout</button>
             </div>
           </header>
+
+          {finished && (
+            <button type="button" className="definition-btn" onClick={handleDefinition}>
+              Word Definition
+            </button>
+          )}
+
+          {isDefinitionOpen && definitionData && (
+            <div className="hint-modal-overlay" onClick={() => update({ isDefinitionOpen: false })}>
+              <div className="hint-modal definition-modal" onClick={(e) => e.stopPropagation()}>
+                <button type="button" className="hint-modal-close" aria-label="Close" onClick={() => update({ isDefinitionOpen: false })}>×</button>
+                <h3 className="hint-modal-title">{definitionData.word}</h3>
+                {definitionData.meanings.map((m, i) => (
+                  <div key={i} className="definition-meaning">
+                    <p className="definition-pos">{m.partOfSpeech}</p>
+                    {m.definitions.map((d, j) => (
+                      <p key={j} className="definition-text">{d}</p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {isHintModalOpen && (
             <div className="hint-modal-overlay" onClick={() => update({ isHintModalOpen: false })}>

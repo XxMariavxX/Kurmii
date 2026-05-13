@@ -71,6 +71,10 @@ export async function fetchDailyWordMeta() {
   }
 }
 
+export async function fetchWordDefinition(word) {
+  return requestJson(`${API_BASE}/word-definition?word=${encodeURIComponent(word)}`);
+}
+
 export async function fetchDaylyHints(guessLetter) {
   try {
     return await requestJson(
