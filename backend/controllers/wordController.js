@@ -24,7 +24,7 @@ export const getDailyWordMeta = () => {
   };
 };
 
-function computeGuess(guess, targetWord) {
+function computeGuessCore(guess, targetWord) {
   const normalizedGuess = normalizeWord(guess);
 
   if (normalizedGuess.length !== 5) {
@@ -66,7 +66,12 @@ function computeGuess(guess, targetWord) {
   return { result };
 }
 
-const memoizedCheckGuess = memoize(log(computeGuess), { capacity: 10, ttl: 60 * 60 * 1000 });
+const memoizedCheckGuess = memoize(
+  log(function computeGuess(guess, targetWord) {
+    return computeGuessCore(guess, targetWord);
+  }),
+  { capacity: 10, ttl: 60 * 60 * 1000 }
+);
 
 export const checkGuess = (guess) => {
   const currentDailyWord = getDailyWord();

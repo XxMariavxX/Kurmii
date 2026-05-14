@@ -4,7 +4,16 @@ import createLogger from "../lib/logger.js";
 const log = createLogger({ level: "INFO" });
 
 const usersDb = new Map([
-  ["admin", { passwordHash: crypto.createHash("sha256").update("admin123").digest("hex"), role: "admin" }],
+  [
+    "admin",
+    {
+      passwordHash: crypto
+        .createHash("sha256")
+        .update("admin123")
+        .digest("hex"),
+      role: "admin",
+    },
+  ],
 ]);
 
 const tokens = new Map();
@@ -16,7 +25,8 @@ export const loginUser = (username, password) => {
   if (!user) return { success: false, error: "Incorrect login or password" };
 
   const hash = crypto.createHash("sha256").update(password).digest("hex");
-  if (hash !== user.passwordHash) return { success: false, error: "Incorrect login or password" };
+  if (hash !== user.passwordHash)
+    return { success: false, error: "Incorrect login or password" };
 
   const token = generateToken();
   tokens.set(token, { username, role: user.role, createdAt: Date.now() });
@@ -24,7 +34,7 @@ export const loginUser = (username, password) => {
   return { success: true, token };
 };
 
-function verifyTokenFn(token) {
+export const verifyToken = log(function (token) {
   const entry = tokens.get(token);
   if (!entry) return null;
 
@@ -35,13 +45,19 @@ function verifyTokenFn(token) {
   }
 
   return entry;
-}
+});
 
-export const verifyToken = log(verifyTokenFn);
-export const revokeToken = log(function revokeToken(token) { return tokens.delete(token); });
+export const revokeToken = log(function revokeToken(token) {
+  return tokens.delete(token);
+});
 
 export const registerUser = (username, password) => {
-  if (!username || typeof username !== "string" || username.length < 3 || username.length > 32) {
+  if (
+    !username ||
+    typeof username !== "string" ||
+    username.length < 3 ||
+    username.length > 32
+  ) {
     return { success: false, error: "Username must be 3–32 characters" };
   }
   if (!password || typeof password !== "string" || password.length < 4) {
@@ -51,7 +67,10 @@ export const registerUser = (username, password) => {
     return { success: false, error: "Username already taken" };
   }
 
-  const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+  const passwordHash = crypto
+    .createHash("sha256")
+    .update(password)
+    .digest("hex");
   usersDb.set(username, { passwordHash, role: "user" });
 
   const token = generateToken();
