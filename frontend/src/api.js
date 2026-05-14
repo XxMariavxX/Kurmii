@@ -56,7 +56,6 @@ export async function logout() {
   try {
     await requestJson(`${API_BASE}/logout`, { method: "POST" });
   } catch {
-    // token already invalid or missing — treat as logged out
   } finally {
     clearAuthToken();
   }
