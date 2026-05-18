@@ -85,7 +85,10 @@ export async function fetchDaylyHints(guessLetter) {
   }
 }
 
-export async function checkWordStream(guess, onChunk) {
+export async function checkWordStream(guess, onChunk, { onError, timeoutMs = 10000 } = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch(`${API_BASE}/check-word`, {
       method: "POST",
@@ -94,15 +97,17 @@ export async function checkWordStream(guess, onChunk) {
         ...authHeaders(),
       },
       body: JSON.stringify({ guess }),
+      signal: controller.signal,
     });
 
     if (!response.ok) {
+      if (response.status === 401) clearAuthToken();
       let message = `HTTP error! status: ${response.status}`;
       try {
         const errorData = await response.json();
         message = errorData?.error || message;
-      } catch (error) {
-        console.error("Error parse stream error response", error);
+      } catch {
+        // ignore parse error on error response
       }
       throw new Error(message);
     }
@@ -115,31 +120,43 @@ export async function checkWordStream(guess, onChunk) {
     const decoder = new TextDecoder();
     let buffer = "";
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split("\n\n");
-      buffer = parts.pop() || "";
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() || "";
 
-      for (const part of parts) {
-        const line = part.split("\n").find((item) => item.startsWith("data: "));
-        if (!line) continue;
+        for (const part of parts) {
+          const line = part.split("\n").find((item) => item.startsWith("data: "));
+          if (!line) continue;
 
-        const payload = line.replace("data: ", "").trim();
-        if (!payload || payload === "done") continue;
+          const payload = line.replace("data: ", "").trim();
+          if (!payload || payload === "done") continue;
 
-        try {
-          const data = JSON.parse(payload);
-          onChunk?.(data);
-        } catch (error) {
-          console.error("Stream parse error", error);
+          try {
+            const data = JSON.parse(payload);
+            onChunk?.(data);
+          } catch (parseErr) {
+            console.error("Stream parse error:", parseErr, "payload:", payload);
+            onError?.(parseErr);
+          }
         }
       }
+    } finally {
+      reader.releaseLock();
     }
   } catch (error) {
+    if (error.name === "AbortError") {
+      const timeoutErr = new Error("Connection timed out. Please try again.");
+      console.error("checkWordStream timed out");
+      throw timeoutErr;
+    }
     console.error("Error check word stream", error);
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

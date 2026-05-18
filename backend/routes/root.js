@@ -229,7 +229,7 @@ export default async function (fastify) {
       const response = await fastify.serviceProxy(
         `https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`,
         {},
-        { rateLimit: 30, rateLimitKey: "definition" }
+        { rateLimit: 30, rateLimitKey: "definition", timeout: 5000 }
       );
 
       if (!response.ok) {
@@ -247,6 +247,9 @@ export default async function (fastify) {
     } catch (error) {
       if (error.code === "RATE_LIMIT") {
         return reply.code(429).send({ error: "Too many definition requests. Try again later." });
+      }
+      if (error.code === "TIMEOUT") {
+        return reply.code(504).send({ error: "Definition service timed out. Try again later." });
       }
       return reply.code(500).send({ error: "Failed to fetch word definition" });
     }

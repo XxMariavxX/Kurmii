@@ -34,7 +34,7 @@ function createAuthProxy(credential, getToken) {
   });
 
   return async function proxyFetch(url, options = {}, proxyOptions = {}) {
-    const { strategy = "bearer", headerName, rateLimit = Infinity, rateLimitKey = "default" } = proxyOptions;
+    const { strategy = "bearer", headerName, rateLimit = Infinity, rateLimitKey = "default", timeout } = proxyOptions;
 
     if (!checkRateLimit(rateLimitKey, rateLimit)) {
       throw Object.assign(new Error("Rate limit exceeded"), { code: "RATE_LIMIT" });
@@ -52,26 +52,49 @@ function createAuthProxy(credential, getToken) {
       authHeaders = strategies.bearer(token);
     }
 
+    let signal = options.signal ?? null;
+    let timeoutController;
+    let timeoutId;
+
+    if (timeout != null) {
+      timeoutController = new AbortController();
+      timeoutId = setTimeout(() => timeoutController.abort(), timeout);
+      if (signal) {
+        signal.addEventListener("abort", () => timeoutController.abort(), { once: true });
+      }
+      signal = timeoutController.signal;
+    }
+
     const mergedOptions = {
       ...options,
       headers: { ...options.headers, ...authHeaders },
+      ...(signal ? { signal } : {}),
     };
 
-    const response = await fetch(url, mergedOptions);
+    try {
+      const response = await fetch(url, mergedOptions);
 
-    if (response.status === 401 && typeof getToken === "function") {
-      const freshToken = await getToken(true);
-      mergedOptions.headers = {
-        ...options.headers,
-        ...strategies.bearer(freshToken),
-      };
-      const retryResponse = await fetch(url, mergedOptions);
-      logRequest(url, strategy, retryResponse.status).catch(() => {});
-      return retryResponse;
+      if (response.status === 401 && typeof getToken === "function") {
+        const freshToken = await getToken(true);
+        mergedOptions.headers = {
+          ...options.headers,
+          ...strategies.bearer(freshToken),
+        };
+        const retryResponse = await fetch(url, mergedOptions);
+        logRequest(url, strategy, retryResponse.status).catch(() => {});
+        return retryResponse;
+      }
+
+      logRequest(url, strategy, response.status).catch(() => {});
+      return response;
+    } catch (error) {
+      if (error.name === "AbortError") {
+        throw Object.assign(new Error(`Request to ${url} timed out after ${timeout}ms`), { code: "TIMEOUT" });
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    logRequest(url, strategy, response.status).catch(() => {});
-    return response;
   };
 }
 

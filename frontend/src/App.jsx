@@ -4,15 +4,18 @@ import MainPage from "./pages/MainPage";
 import QuizPage from "./pages/QuizPage";
 import Submit from "./pages/Login";
 import ProfilePage from "./pages/ProfilePage";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
-    <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/quiz" element={<QuizPage />} />
-        <Route path="/submit" element={<Submit />} />
-        <Route path="/profile" element={<ProfilePage />} />
-    </Routes>
+    <ErrorBoundary>
+      <Routes>
+          <Route path="/" element={<ErrorBoundary><MainPage /></ErrorBoundary>} />
+          <Route path="/quiz" element={<ErrorBoundary><QuizPage /></ErrorBoundary>} />
+          <Route path="/submit" element={<ErrorBoundary><Submit /></ErrorBoundary>} />
+          <Route path="/profile" element={<ErrorBoundary><ProfilePage /></ErrorBoundary>} />
+      </Routes>
+    </ErrorBoundary>
   );
 }
 
